@@ -21,8 +21,8 @@ public class KaratsubaMultiplier {
      * @throws NullPointerException when either argument is null
      */
     public static BigInteger karatsuba(BigInteger x, BigInteger y) {
-        Objects.requireNonNull(x, "x must not be null");
-        Objects.requireNonNull(y, "y must not be null");
+        Objects.requireNonNull(x, "x can't be null");
+        Objects.requireNonNull(y, "y can't null");
  
         // Record the result's sign, then work with absolute values.
         int sign = x.signum() * y.signum();
@@ -33,10 +33,41 @@ public class KaratsubaMultiplier {
     }
 
 
+        private static BigInteger karatsubaNonnegative(BigInteger x, BigInteger y) {
+        int xDigits = decimalDigits(x);
+        int yDigits = decimalDigits(y);
+ 
+        //base case
+        if (xDigits == 1 || yDigits == 1) {
+            return x.multiply(y);
+        }
+ 
+        //n = greater digit count, m = n / 2, split at 10^m
+        int n = Math.max(xDigits, yDigits);
+        int m = n / 2;
+        BigInteger splitter = TEN.pow(m);
+ 
+        //x = x_high * 10^m + x_low
+        BigInteger[] xParts = x.divideAndRemainder(splitter);
+        BigInteger xHigh = xParts[0];
+        BigInteger xLow = xParts[1];
+ 
+        //y = y_high * 10^m + y_low
+        BigInteger[] yParts = y.divideAndRemainder(splitter);
+        BigInteger yHigh = yParts[0];
+        BigInteger yLow = yParts[1];
+ 
+        BigInteger highProduct = karatsubaNonnegative(xHigh, yHigh);
+        BigInteger lowProduct = karatsubaNonnegative(xLow, yLow);
+        BigInteger sumProduct = karatsubaNonnegative(xHigh.add(xLow), yHigh.add(yLow));
+ 
+        BigInteger crossProduct = sumProduct.subtract(highProduct).subtract(lowProduct);
+ 
+        // result = high_product * 10^(2m) + cross_product * 10^m + low_product
+        return highProduct.multiply(TEN.pow(2 * m))
+                .add(crossProduct.multiply(splitter))
+                .add(lowProduct);
 
-    private static BigInteger karatsubaNonnegative(BigInteger x, BigInteger y) {
-        // TODO: Apply the decimal Karatsuba recurrence with exactly three recursive products.
-        throw new UnsupportedOperationException("TODO: implement karatsubaNonnegative");
     }
 
     private static int decimalDigits(BigInteger value) {
