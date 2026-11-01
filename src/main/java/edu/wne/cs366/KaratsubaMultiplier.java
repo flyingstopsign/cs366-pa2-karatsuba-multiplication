@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * CS366 Programming Assignment 02: Karatsuba Multiplication.
  *
- * @author Your Name
+ * @author Brady Paiva
  */
 public class KaratsubaMultiplier {
  
@@ -71,8 +71,18 @@ public class KaratsubaMultiplier {
     }
 
     private static int decimalDigits(BigInteger value) {
-        // TODO: Return the number of decimal digits in a nonnegative value; zero has one digit.
-        throw new UnsupportedOperationException("TODO: implement decimalDigits");
+        if (value.signum() == 0) {
+            return 1;
+        }
+ 
+        //estimate from the bit length log10(2), compare against powers of 10
+        int digits = (int) (value.bitLength() * 0.3010299) + 1;
+        if (value.compareTo(TEN.pow(digits - 1)) < 0) {
+            digits--;//estimate was one too high
+        } else if (value.compareTo(TEN.pow(digits)) >= 0) {
+            digits++;//estimate was one too low
+        }
+        return digits;
     }
 
     public static void main(String[] args) {
